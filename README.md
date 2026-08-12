@@ -205,4 +205,10 @@ https://developers.openai.com/ads/conversions-api
 
 ## License
 
-Apache License 2.0. See `LICENSE`.
+Apache License 2.0. See [LICENSE](LICENSE).
+
+## Support
+
+Open an issue in this repository, or reach the team at
+[wascer.com](https://wascer.com). If you host your server container with Wascer,
+support is included in your plan.
