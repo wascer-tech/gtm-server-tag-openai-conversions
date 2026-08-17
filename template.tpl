@@ -88,7 +88,7 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Standard event",
         "simpleValueType": true,
         "defaultValue": "page_viewed",
-        "macrosInSelect": false,
+        "macrosInSelect": true,
         "selectItems": [
           {
             "value": "page_viewed",
@@ -150,7 +150,7 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ],
-        "help": "Pick the event that matches what happened. OpenAI accepts different data for each event, so check the Event data fields after you choose."
+        "help": "Pick the event that matches what happened. OpenAI accepts different data for each event, so check the Event data fields after you choose. You can also select a variable when the event name comes from the page or the data layer. It has to resolve to one of the names on the list."
       },
       {
         "type": "TEXT",
@@ -712,7 +712,7 @@ function finishOnce(event) {
 // Event building
 
 function buildEvent() {
-  const eventName = data.eventNameSource === 'custom' ? 'custom' : (data.eventNameStandard || 'page_viewed');
+  const eventName = data.eventNameSource === 'custom' ? 'custom' : standardEventName();
   const obref = resolveObref();
 
   const event = {
@@ -736,6 +736,23 @@ function buildEvent() {
   if (oppref) event.oppref = oppref;
 
   return event;
+}
+
+// The Standard event field accepts a variable, so the name arrives untyped and it
+// may not be one of the names OpenAI knows.
+function standardEventName() {
+  if (isBlank(data.eventNameStandard)) {
+    log('Message', 'The standard event name resolved to nothing, so this event goes out as page_viewed. Check the variable in the Standard event field.');
+    return 'page_viewed';
+  }
+
+  const name = makeString(data.eventNameStandard).trim();
+
+  if (!DATA_TYPE_BY_EVENT[name]) {
+    log('Message', 'OpenAI has no standard event called ' + name + ', so the event goes out with custom event data.');
+  }
+
+  return name;
 }
 
 function resolveEventId() {
@@ -1763,6 +1780,53 @@ scenarios:
 
     assertApi('gtmOnSuccess').wasCalled();
     assertApi('gtmOnFailure').wasNotCalled();
+- name: Takes the standard event name from a variable
+  code: |-
+    mockEvent(baseEventData());
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({eventNameStandard: ' order_created '}));
+
+    const event = capturedBody.events[0];
+    assertThat(event.type).isEqualTo('order_created');
+    assertThat(event.custom_event_name).isEqualTo(undefined);
+    assertThat(event.data.type).isEqualTo('contents');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Falls back to page_viewed when the event name variable resolves to nothing
+  code: |-
+    mockEvent(baseEventData());
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({eventNameStandard: undefined}));
+
+    assertThat(capturedBody.events[0].type).isEqualTo('page_viewed');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Sends an unknown event name with custom event data
+  code: |-
+    mockEvent(baseEventData());
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({eventNameStandard: 'order_creted'}));
+
+    const event = capturedBody.events[0];
+    assertThat(event.type).isEqualTo('order_creted');
+    assertThat(event.data.type).isEqualTo('custom');
+    assertApi('gtmOnSuccess').wasCalled();
 - name: Blocks a web event that has no source_url
   code: |-
     const incoming = baseEventData();
