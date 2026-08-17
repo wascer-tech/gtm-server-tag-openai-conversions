@@ -49,7 +49,8 @@ ___TEMPLATE_PARAMETERS___
           {
             "type": "NON_EMPTY"
           }
-        ]
+        ],
+        "help": "You find it in the conversions tab of OpenAI Ads Manager. It is the same pixel ID you use in the web tag."
       },
       {
         "type": "TEXT",
@@ -78,7 +79,8 @@ ___TEMPLATE_PARAMETERS___
             "value": "custom",
             "displayValue": "Custom event"
           }
-        ]
+        ],
+        "help": "Standard events are the ones OpenAI knows by name. Pick Custom event when nothing on the list fits what happened."
       },
       {
         "type": "SELECT",
@@ -147,7 +149,8 @@ ___TEMPLATE_PARAMETERS___
             "paramValue": "standard",
             "type": "EQUALS"
           }
-        ]
+        ],
+        "help": "Pick the event that matches what happened. OpenAI accepts different data for each event, so check the Event data fields after you choose."
       },
       {
         "type": "TEXT",
@@ -167,6 +170,13 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ]
+      },
+      {
+        "type": "TEXT",
+        "name": "eventId",
+        "displayName": "Event ID",
+        "simpleValueType": true,
+        "help": "Point this at the same value the web pixel sends as Event ID so OpenAI counts one conversion instead of two. A transaction ID works well for purchases. Leave it empty and the tag reads event_id from the incoming event, then generates one, and a generated id never deduplicates."
       },
       {
         "type": "SELECT",
@@ -204,7 +214,8 @@ ___TEMPLATE_PARAMETERS___
             "value": "other",
             "displayValue": "Other"
           }
-        ]
+        ],
+        "help": "Where the conversion happened. web needs a source URL. app_installed and app_opened only work with mobile_app."
       },
       {
         "type": "CHECKBOX",
@@ -227,42 +238,22 @@ ___TEMPLATE_PARAMETERS___
         "name": "autoMapEventData",
         "checkboxText": "Map amount, currency and items from the incoming event",
         "simpleValueType": true,
-        "defaultValue": true
+        "defaultValue": true,
+        "help": "Reads amount, currency, value, items and plan_id from the event that reached the server container. Anything you set in the table below wins over it."
       },
       {
         "type": "SIMPLE_TABLE",
         "name": "eventDataTable",
         "displayName": "Event data fields",
-        "help": "Anything you set here wins over the incoming event. Use amount_major for a value in the regular unit, such as 25.99. The tag converts it to amount.",
+        "newRowButtonText": "Add field",
+        "help": "Anything you set here wins over the incoming event. OpenAI reads amount for a value already in the minor unit, value or amount_major for a value in the regular unit such as 25.99, currency for the ISO 4217 code in three letters, contents or items for the array of items, and plan_id for the plan. It drops contents on the customer action events, and plan_id outside subscription_created, trial_started and custom. Any other name you type goes out as it is, and a field OpenAI does not expect fails the whole batch, so check the documentation first.",
         "simpleTableColumns": [
           {
             "defaultValue": "",
             "displayName": "Field",
             "name": "name",
-            "type": "SELECT",
-            "isUnique": true,
-            "selectItems": [
-              {
-                "value": "amount",
-                "displayValue": "amount"
-              },
-              {
-                "value": "amount_major",
-                "displayValue": "amount_major"
-              },
-              {
-                "value": "currency",
-                "displayValue": "currency"
-              },
-              {
-                "value": "plan_id",
-                "displayValue": "plan_id"
-              },
-              {
-                "value": "contents",
-                "displayValue": "contents"
-              }
-            ]
+            "type": "TEXT",
+            "isUnique": true
           },
           {
             "defaultValue": "",
@@ -285,7 +276,8 @@ ___TEMPLATE_PARAMETERS___
         "name": "autoMapUserData",
         "checkboxText": "Map user data from the incoming event",
         "simpleValueType": true,
-        "defaultValue": true
+        "defaultValue": true,
+        "help": "Reads user_data from the incoming event, including the address object. The GA4 web tag only sends user_data when you turn on User Provided Data there."
       },
       {
         "type": "SIMPLE_TABLE",
@@ -360,7 +352,8 @@ ___TEMPLATE_PARAMETERS___
         "name": "useStore",
         "checkboxText": "Enrich events with the Wascer Store",
         "simpleValueType": true,
-        "defaultValue": false
+        "defaultValue": false,
+        "help": "Adds one call to the container database per event. The container needs the enable_database flag turned on."
       },
       {
         "type": "TEXT",
@@ -374,7 +367,8 @@ ___TEMPLATE_PARAMETERS___
             "paramValue": true,
             "type": "EQUALS"
           }
-        ]
+        ],
+        "help": "The collection that holds the identifiers. Any name works, as long as the read and the write use the same one."
       },
       {
         "type": "SELECT",
@@ -403,7 +397,8 @@ ___TEMPLATE_PARAMETERS___
             "paramValue": true,
             "type": "EQUALS"
           }
-        ]
+        ],
+        "help": "The value the Store uses to find the visitor again. obref is the browser reference this tag keeps in a cookie, so it survives between sessions."
       },
       {
         "type": "TEXT",
@@ -421,7 +416,8 @@ ___TEMPLATE_PARAMETERS___
             "paramValue": "custom",
             "type": "EQUALS"
           }
-        ]
+        ],
+        "help": "Point it at a variable that stays the same for the same visitor, such as a hashed customer ID."
       },
       {
         "type": "CHECKBOX",
@@ -435,7 +431,8 @@ ___TEMPLATE_PARAMETERS___
             "paramValue": true,
             "type": "EQUALS"
           }
-        ]
+        ],
+        "help": "Fills only the identifiers the incoming event left empty. It never overwrites what you mapped by hand."
       },
       {
         "type": "CHECKBOX",
@@ -449,7 +446,8 @@ ___TEMPLATE_PARAMETERS___
             "paramValue": true,
             "type": "EQUALS"
           }
-        ]
+        ],
+        "help": "Saves the identifiers of this event so a later one finds them. The Store keeps them for 90 days and renews the deadline on every write."
       }
     ]
   },
@@ -464,14 +462,16 @@ ___TEMPLATE_PARAMETERS___
         "name": "setOpprefCookie",
         "checkboxText": "Set the __oppref cookie",
         "simpleValueType": true,
-        "defaultValue": false
+        "defaultValue": false,
+        "help": "Writes the OpenAI click reference in a first party cookie, so a conversion that happens days after the click still finds it."
       },
       {
         "type": "CHECKBOX",
         "name": "setObrefCookie",
         "checkboxText": "Set the __obref cookie",
         "simpleValueType": true,
-        "defaultValue": false
+        "defaultValue": false,
+        "help": "Writes the browser reference this tag generates. It is the default document key of the Wascer Store."
       },
       {
         "type": "GROUP",
@@ -507,21 +507,24 @@ ___TEMPLATE_PARAMETERS___
                 "value": "None",
                 "displayValue": "None"
               }
-            ]
+            ],
+            "help": "Lax works for most sites. Use None when the checkout runs inside an iframe on another domain."
           },
           {
             "type": "TEXT",
             "name": "opprefExpiration",
             "displayName": "__oppref lifetime in days",
             "simpleValueType": true,
-            "defaultValue": "30"
+            "defaultValue": "30",
+            "help": "In days. 30 matches the attribution window OpenAI uses."
           },
           {
             "type": "TEXT",
             "name": "obrefExpiration",
             "displayName": "__obref lifetime in days",
             "simpleValueType": true,
-            "defaultValue": "365"
+            "defaultValue": "365",
+            "help": "In days. Keep it long, because this is what ties a returning visitor to the identifiers in the Store."
           }
         ]
       }
@@ -548,7 +551,8 @@ ___TEMPLATE_PARAMETERS___
             "value": "required",
             "displayValue": "Send only when ad_storage is granted"
           }
-        ]
+        ],
+        "help": "Required drops the event when ad_storage is denied, reading consent_state or the third character of the x-ga-gcs header."
       }
     ]
   },
@@ -563,14 +567,16 @@ ___TEMPLATE_PARAMETERS___
         "name": "debug",
         "checkboxText": "Log the request payload to the server container console",
         "simpleValueType": true,
-        "defaultValue": false
+        "defaultValue": false,
+        "help": "Prints the payload, the resolved Store URL and the OpenAI response in the container logs. Turn it off before you publish."
       },
       {
         "type": "CHECKBOX",
         "name": "optimistic",
         "checkboxText": "Report success without waiting for the OpenAI response",
         "simpleValueType": true,
-        "defaultValue": false
+        "defaultValue": false,
+        "help": "The tag reports success as soon as it sends the request, without waiting for OpenAI. Use it when a slow response is holding up the container."
       }
     ]
   }
@@ -632,6 +638,13 @@ const DATA_TYPE_BY_EVENT = {
 const TYPES_WITH_CONTENTS = 'contents,plan_enrollment,custom';
 const TYPES_WITH_PLAN_ID = 'plan_enrollment,custom';
 const STORE_USER_FIELDS = ['email_sha256', 'external_id_sha256', 'country', 'city', 'zip_code'];
+const KNOWN_DATA_FIELDS = [
+  'amount', 'amount_major', 'value', 'currency', 'contents', 'items', 'plan_id'
+];
+
+// These belong to the event itself, not to data. A row with one of these names
+// sets the event id instead of going out inside data.
+const EVENT_ID_FIELDS = ['event_id', 'eventId', 'id'];
 
 const eventData = getAllEventData();
 const storeCollection = data.storeCollection ? makeString(data.storeCollection).trim() : 'openai_ads';
@@ -726,9 +739,26 @@ function buildEvent() {
 }
 
 function resolveEventId() {
+  if (!isBlank(data.eventId)) return makeString(data.eventId).trim();
+
+  const fromTable = eventIdFromTable();
+  if (fromTable) return fromTable;
+
   const fromEvent = eventData.event_id || eventData.eventId;
   if (fromEvent) return makeString(fromEvent);
+
+  log('Message', 'No event id was found, so this event carries a generated one and cannot be deduplicated with the pixel.');
   return uuidV4();
+}
+
+function eventIdFromTable() {
+  const rows = data.eventDataTable || [];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || !row.name || isBlank(row.value)) continue;
+    if (EVENT_ID_FIELDS.indexOf(row.name) !== -1) return makeString(row.value).trim();
+  }
+  return undefined;
 }
 
 function resolveOppref() {
@@ -916,20 +946,30 @@ function applyEventDataTable(payload, dataType) {
     else log('Message', 'plan_id was dropped because the event data type is ' + dataType + '.');
   }
 
-  if (values.contents) {
-    const parsed = parseContents(values.contents);
+  const rawContents = values.contents || values.items;
+  if (rawContents) {
+    const parsed = parseContents(rawContents);
     if (parsed && TYPES_WITH_CONTENTS.indexOf(dataType) !== -1) payload.contents = parsed;
     else if (parsed) log('Message', 'contents was dropped because the event data type is ' + dataType + '.');
   }
 
-  if (values.amount_major) {
-    const converted = toMinorUnit(values.amount_major, payload.currency);
+  const rawMajor = values.amount_major || values.value;
+  if (rawMajor) {
+    const converted = toMinorUnit(rawMajor, payload.currency);
     if (converted !== undefined) payload.amount = converted;
   }
 
   if (values.amount) {
     const explicit = makeInteger(values.amount);
     if (explicit === explicit) payload.amount = explicit;
+  }
+
+  for (let k = 0; k < rows.length; k++) {
+    const name = rows[k] && rows[k].name;
+    if (!name || isBlank(rows[k].value)) continue;
+    if (KNOWN_DATA_FIELDS.indexOf(name) !== -1) continue;
+    if (EVENT_ID_FIELDS.indexOf(name) !== -1) continue;
+    payload[name] = rows[k].value;
   }
 }
 
@@ -1949,6 +1989,95 @@ scenarios:
     assertThat(event.custom_event_name).isEqualTo('quote_requested');
     assertThat(event.data.type).isEqualTo('custom');
     assertApi('gtmOnSuccess').wasCalled();
+- name: The value and items names work like amount_major and contents
+  code: |-
+    mockEvent(baseEventData());
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({
+      eventNameStandard: 'order_created',
+      autoMapEventData: false,
+      eventDataTable: [
+        {name: 'value', value: '25.99'},
+        {name: 'currency', value: 'USD'},
+        {name: 'items', value: [{id: 'sku-1', name: 'Shirt', quantity: 1, amount: 2599, currency: 'USD'}]}
+      ]
+    }));
+
+    const event = capturedBody.events[0];
+    assertThat(event.data.amount).isEqualTo(2599);
+    assertThat(event.data.currency).isEqualTo('USD');
+    assertThat(event.data.contents[0].id).isEqualTo('sku-1');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: A field the tag does not know goes out as it is
+  code: |-
+    mockEvent(baseEventData());
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({
+      eventNameStandard: 'order_created',
+      autoMapEventData: false,
+      eventDataTable: [
+        {name: 'amount', value: '4500'},
+        {name: 'currency', value: 'BRL'},
+        {name: 'order_tier', value: 'wholesale'}
+      ]
+    }));
+
+    const event = capturedBody.events[0];
+    assertThat(event.data.amount).isEqualTo(4500);
+    assertThat(event.data.order_tier).isEqualTo('wholesale');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: The Event ID field wins over the incoming event
+  code: |-
+    mockEvent(baseEventData());
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({
+      eventNameStandard: 'order_created',
+      eventId: ' order-9001 '
+    }));
+
+    assertThat(capturedBody.events[0].id).isEqualTo('order-9001');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: An event id row sets the event id and stays out of data
+  code: |-
+    const incoming = baseEventData();
+    incoming.event_id = undefined;
+    mockEvent(incoming);
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({
+      eventNameStandard: 'order_created',
+      eventDataTable: [
+        {name: 'event_id', value: 'order-42'}
+      ]
+    }));
+
+    const event = capturedBody.events[0];
+    assertThat(event.id).isEqualTo('order-42');
+    assertThat(event.data.event_id).isEqualTo(undefined);
+    assertApi('gtmOnSuccess').wasCalled();
 setup: |-
   const JSON = require('JSON');
   const Object = require('Object');
@@ -2065,8 +2194,12 @@ No Store failure, timeout or missing document ever blocks the OpenAI request.
 Event ids must match the pixel
 OpenAI deduplicates a browser event and a server event when both carry the same
 identifier. The pixel sends it as event_id and this tag sends it as id. Feed
-both from the same value. When the incoming event has no event_id, the tag
-generates one, and that event cannot be deduplicated.
+both from the same value.
+
+The Event ID field in Configuration is the place to do it, and it wins over
+everything else. Without it the tag reads an event_id or id row from the event
+data table, then event_id on the incoming event, and only then generates one.
+A generated id cannot be deduplicated, so the tag says so in the debug log.
 
 The timestamp window is seven days
 OpenAI accepts events stamped within the last seven days and up to ten minutes
