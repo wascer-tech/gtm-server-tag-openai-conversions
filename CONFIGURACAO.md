@@ -118,12 +118,22 @@ do grupo **User data**, ou ligue a **Wascer Store**, explicada na parte 2.
 
 Sem isso, o pixel e o servidor viram duas conversões separadas.
 
-No container web, na tag do GA4, adicione um parâmetro de evento chamado
-`event_id` apontando para a mesma variável que você usou no campo **Event ID** do
-pixel. Para compra, o id da transação resolve.
+O jeito mais direto é o campo **Event ID**, no grupo Configuration desta tag.
+Aponte ele para a mesma variável que você usou no campo **Event ID** do pixel.
+Para compra, o id da transação resolve.
 
-Esta tag lê o `event_id` do evento que chegou. Quando não encontra, ela gera um,
-e aí aquele evento não tem como ser deduplicado.
+Se preferir deixar o valor viajar pelo evento, no container web adicione na tag
+do GA4 um parâmetro de evento chamado `event_id` com essa mesma variável.
+
+A ordem que a tag segue é esta:
+
+1. O campo **Event ID** da configuração, quando preenchido.
+2. Uma linha chamada `event_id` ou `id` na tabela de **Event data**.
+3. O `event_id` do evento que chegou no container.
+4. Um id gerado na hora.
+
+O id gerado não tem como ser deduplicado. Com o log do console ligado, a tag
+avisa quando cai nesse caso.
 
 ## Passo 7: testar no Preview
 
@@ -169,6 +179,7 @@ identificadores quando eles aparecem e devolve quando faltam. Detalhes na parte 
 | Event name | Escolhe entre evento padrão e evento seu. |
 | Event | O evento padrão. Cada um tem um tipo de dado fixo, e a tabela no fim deste documento mostra qual. |
 | Custom event name | O nome do seu evento, quando você escolhe custom. Letras, números, underscore e hífen, até 64 caracteres. |
+| Event ID | O identificador que casa este evento com o do pixel. Aponte para a mesma variável que você usou no pixel. Vazio, a tag procura o `event_id` do evento que chegou e, se não achar, gera um que não deduplica. |
 | Action source | De onde veio a conversão. `web` é o padrão. Com `web`, a OpenAI exige `source_url`, e a tag pega isso do `page_location` do evento. `app_installed` e `app_opened` exigem `mobile_app`. |
 | Validate without saving | Liga o modo de teste. A OpenAI valida o payload, responde, e joga fora. Use enquanto estiver montando a tag, porque nada entra na sua conta. |
 
@@ -211,22 +222,31 @@ Ou seja, `value: 2599` em JPY continua `2599`, e não vira 259900.
 
 ### A tabela manual
 
-O que você digita na tabela **vence** o mapeamento automático. Nomes aceitos:
+Na tabela **Event data fields** você escreve o nome do campo de um lado e aponta
+a variável do outro, igual aos parâmetros de evento do GA4 e igual à tag do
+pixel. O que está na tabela **vence** o mapeamento automático.
+
+Nomes que a tag trata:
 
 | Nome | Uso |
 |---|---|
 | `amount` | Valor já em unidade menor. Use quando você tem o número em centavos. |
-| `amount_major` | Valor em unidade regular, tipo `25.99`. A tag converte. |
+| `value` | Valor em unidade regular, tipo `25.99`. A tag converte. `amount_major` faz o mesmo. |
 | `currency` | Código ISO da moeda. |
 | `plan_id` | Identificador do plano. |
-| `contents` | Lista de itens pronta, se você montar por variável. |
+| `items` | Lista de itens pronta, se você montar por variável. `contents` faz o mesmo. |
 
-Se `amount` e `amount_major` aparecerem juntos, `amount` ganha.
+Se `amount` e `value` aparecerem juntos, `amount` ganha.
 
 **Campos que não cabem no tipo do evento são descartados**, com um aviso no
 console. `plan_id` só vale em `subscription_created`, `trial_started` e `custom`.
-`contents` não vale em eventos de ação do usuário como `lead_created`. Isso é
+`items` não vale em eventos de ação do usuário como `lead_created`. Isso é
 proteção: a OpenAI recusa o lote inteiro quando um evento traz campo inválido.
+
+**Qualquer outro nome que você escrever sai como está.** Aqui isso pesa mais do
+que no pixel: um campo que a OpenAI não espera derruba o lote todo, que pode ter
+até mil eventos, não só o disparo da vez. Confira na documentação antes, e use o
+**Validate without saving** para testar sem gravar nada.
 
 ### Regra que bloqueia o envio
 
@@ -437,9 +457,10 @@ A OpenAI conta uma conversão só quando o evento do navegador e o do servidor
 chegam com o mesmo identificador. O pixel manda como `event_id` e esta tag manda
 como `id`. Alimente os dois com o mesmo valor.
 
-Esta tag pega esse valor do `event_id` do evento que chegou. Quando não encontra,
-ela **gera um**, e aí aquele evento não tem como ser deduplicado. Se você usa as
-duas pontas, garanta que o `event_id` viaje do navegador até o servidor.
+O campo **Event ID** da configuração é onde você faz isso, e ele vence tudo o
+mais. Sem ele, a tag procura uma linha `event_id` ou `id` na tabela de Event
+data, depois o `event_id` do evento que chegou, e só então **gera um**. O id
+gerado não tem como ser deduplicado.
 
 ---
 
