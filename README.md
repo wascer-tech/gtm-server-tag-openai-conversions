@@ -43,8 +43,10 @@ You find the API key in the conversions tab of OpenAI Ads Manager.
 | OpenAI Pixel ID | Goes into the `pid` query parameter of every request. |
 | API key | Sent as `Authorization: Bearer`. Store it in a variable if you rotate it often. |
 | Event name | Choose a standard event or a custom one. |
-| Standard event | One of the 13 names OpenAI accepts. See the table below. |
+| Standard event | One of the 13 names OpenAI accepts. See the table below. The dropdown also takes a variable, for when one tag serves several events and the name comes from the data layer. |
 | Custom event name | Required when the event name is custom. Letters, numbers, underscores and dashes, up to 64 characters. |
+| Event ID | The value OpenAI uses to deduplicate this event against the web pixel. Point it at the same variable the pixel uses. |
+| Event ID | The identifier that pairs this event with the browser one. Point it at the same value the pixel sends. |
 | Action source | Where the conversion happened. `web` requires a page location on the incoming event. `mobile_app` is required for `app_installed` and `app_opened`. |
 | Validate without saving | Sends `validate_only: true`. OpenAI checks the payload and throws it away. |
 
@@ -54,15 +56,21 @@ You find the API key in the conversions tab of OpenAI Ads Manager.
 `currency` and `items` from the GA4 event and builds `contents[]`. When the
 event has no `value`, the template sums the items.
 
-The table below the checkbox overrides anything the mapping produced.
+The table below the checkbox is where you name the field and point the value at
+your own variable, the way the GA4 tag takes event parameters. It overrides
+anything the mapping produced.
 
 | Field | Notes |
 |---|---|
 | `amount` | Already in the minor unit. 2599 means 25.99 in a two decimal currency. |
-| `amount_major` | In the regular unit, such as 25.99. The template converts it. If you fill both, `amount` wins. |
+| `value` | In the regular unit, such as 25.99. The template converts it. If you fill both, `amount` wins. `amount_major` does the same. |
 | `currency` | ISO 4217 code. |
 | `plan_id` | Only reaches the API on `subscription_created`, `trial_started` and custom events. |
-| `contents` | A JSON array, or a variable that returns an array. |
+| `items` | A JSON array, or a variable that returns an array. `contents` does the same. |
+
+Any other name you type goes out untouched. Be careful here: a field OpenAI does
+not expect fails the whole batch, which can hold up to 1000 events, not just this
+hit. Check the documentation first and try it with **Validate without saving**.
 
 ### User data
 
@@ -141,10 +149,11 @@ OpenAI counts one conversion when the browser event and the server event carry
 the same identifier. The pixel sends it as `event_id` and this template sends it
 as `id`. Feed both from the same value.
 
-The template reads `event_id` from the incoming event, falls back to `eventId`,
-and generates one when neither is present. A generated id cannot be
-deduplicated, so set an event id whenever the same conversion also fires in the
-browser.
+The **Event ID** field in Configuration is where you set it, and it wins over
+everything else. Left empty, the template looks for an `event_id` or `id` row in
+the event data table, then for `event_id` on the incoming event, and only then
+generates one. A generated id cannot be deduplicated, so the template says so in
+the debug log.
 
 ## The 13 events
 
@@ -205,10 +214,4 @@ https://developers.openai.com/ads/conversions-api
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
-
-## Support
-
-Open an issue in this repository, or reach the team at
-[wascer.com](https://wascer.com). If you host your server container with Wascer,
-support is included in your plan.
+Apache License 2.0. See `LICENSE`.
