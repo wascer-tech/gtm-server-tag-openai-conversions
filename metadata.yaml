@@ -1,6 +1,15 @@
 homepage: "https://wascer.com"
-documentation: "https://github.com/wascer-tech/gtm-server-tag-openai-conversions"
-categories:
-- ADVERTISING
-- MARKETING
-- CONVERSIONS
+documentation: "https://github.com/wascer-tech/gtm-server-tag-openai-conversions/blob/main/README.md"
+versions:
+  - sha: 2761ec2499aaed509559bba7e61fb0ffcb408c96
+    changeNotes: |
+      New tag logo and new display name.
+      Repairs a city whose UTF-8 was read as Latin-1, before it is lowercased,
+      on both the automatic mapping and the user data table.
+      Three unit tests for the repair.
+  - sha: a65eabad113470ca1c75c4d5eb6e257dc4b70ff3
+    changeNotes: Template fixes.
+  - sha: 33459d0e08cf0bb6d4c93ce15b581f9eed911962
+    changeNotes: Template fixes.
+  - sha: 1c3ddbbd726c4f1fdc2d0681478dbf980c85ab27
+    changeNotes: Initial release.
