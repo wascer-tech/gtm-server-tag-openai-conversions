@@ -13,11 +13,11 @@ ___INFO___
   "id": "cvt_temp_public_id",
   "version": 1,
   "securityGroups": [],
-  "displayName": "Wascer OpenAI Ads Conversions",
+  "displayName": "OpenAI Ads Conversions By Wascer (ChatGPT)",
   "brand": {
     "id": "brand_wascer",
     "displayName": "Wascer",
-    "thumbnail": "data:image/png;base64,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"
+    "thumbnail": "data:image/png;base64,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"
   },
   "description": "Sends server-side events to the OpenAI Ads Conversions API, with optional enrichment from the Wascer Store.",
   "categories": [
@@ -597,6 +597,7 @@ const generateRandom = require('generateRandom');
 const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
 const parseUrl = require('parseUrl');
 const encodeUriComponent = require('encodeUriComponent');
+const decodeUriComponent = require('decodeUriComponent');
 const JSON = require('JSON');
 const getType = require('getType');
 const makeString = require('makeString');
@@ -807,6 +808,43 @@ function resolveObref() {
   return undefined;
 }
 
+// Repair a value whose UTF-8 bytes were read as Latin-1 upstream.
+// The CDN header that carries the city arrives as "ItajubÃ¡" for "Itajubá":
+// the two bytes of "á" (C3 A1) became the two characters "Ã" and "¡". Rebuild
+// the bytes and decode them as UTF-8 again.
+//   encodeUriComponent gives the UTF-8 form of every character:
+//     U+0080..U+00BF -> %C2%xx  and the byte we want is xx
+//     U+00C0..U+00FF -> %C3%yy  and the byte we want is yy + 0x40, which in
+//                               hex only moves the first digit: 8->C, 9->D,
+//                               A->E, B->F
+// The sentinel keeps a rewritten pair from being matched by the next rule.
+// It is "#" because encodeUriComponent always escapes it, so it can never
+// appear on its own inside the string being rewritten.
+function repairMojibake(value) {
+  const text = makeString(value);
+
+  // A healthy string never carries these two characters, and this check is
+  // what keeps it from being touched at all.
+  if (text.indexOf('Ã') === -1 && text.indexOf('Â') === -1) return text;
+
+  const bytes = encodeUriComponent(text)
+    .split('%C2%').join('#')
+    .split('%C3%8').join('#C')
+    .split('%C3%9').join('#D')
+    .split('%C3%A').join('#E')
+    .split('%C3%B').join('#F')
+    .split('#').join('%');
+
+  const decoded = decodeUriComponent(bytes);
+
+  // A string that merely contains "Ã" without being mojibake, an uppercase
+  // "SÃO" say, rebuilds into bytes that are not valid UTF-8 and decodes to
+  // nothing. There the original value is the right answer.
+  if (decoded === undefined || decoded === null) return text;
+
+  return decoded;
+}
+
 function buildUserData(obref) {
   const user = {};
 
@@ -822,7 +860,7 @@ function buildUserData(obref) {
     if (eventData.user_id) user.external_id_sha256 = hashExternalId(eventData.user_id);
 
     const address = readAddress();
-    if (address.city) user.city = truncate(lower(address.city), CITY_MAX);
+    if (address.city) user.city = truncate(lower(repairMojibake(address.city)), CITY_MAX);
     if (address.postal_code) user.zip_code = truncate(makeString(address.postal_code).trim(), ZIP_MAX);
     if (address.country) user.country = makeString(address.country).trim().toUpperCase();
 
@@ -846,7 +884,7 @@ function setUserField(user, name, value) {
   if (name === 'email_sha256') user.email_sha256 = hashEmail(value);
   else if (name === 'external_id_sha256') user.external_id_sha256 = hashExternalId(value);
   else if (name === 'country') user.country = makeString(value).trim().toUpperCase();
-  else if (name === 'city') user.city = truncate(lower(value), CITY_MAX);
+  else if (name === 'city') user.city = truncate(lower(repairMojibake(value)), CITY_MAX);
   else if (name === 'zip_code') user.zip_code = truncate(makeString(value).trim(), ZIP_MAX);
   else if (name === 'obref') user.obref = makeString(value).trim();
   else if (name === 'ip_address') user.ip_address = makeString(value).trim();
@@ -2141,6 +2179,52 @@ scenarios:
     const event = capturedBody.events[0];
     assertThat(event.id).isEqualTo('order-42');
     assertThat(event.data.event_id).isEqualTo(undefined);
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Repairs a city whose UTF-8 was read as latin1
+  code: |-
+    const incoming = baseEventData();
+    incoming.user_data.address.city = 'ItajubÃ¡';
+    mockEvent(incoming);
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({}));
+
+    assertThat(capturedBody.events[0].user.city).isEqualTo('itajubá');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Repairs a city that comes through the user data table
+  code: |-
+    mockEvent(baseEventData());
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({userDataTable: [{name: 'city', value: 'SÃ£o JosÃ© dos Campos'}]}));
+
+    assertThat(capturedBody.events[0].user.city).isEqualTo('são josé dos campos');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Leaves a healthy city exactly as it is
+  code: |-
+    const incoming = baseEventData();
+    incoming.user_data.address.city = 'Itajubá';
+    mockEvent(incoming);
+
+    let capturedBody;
+    mock('sendHttpRequest', (url, options, body) => {
+      capturedBody = JSON.parse(body);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    runCode(mockData({}));
+
+    assertThat(capturedBody.events[0].user.city).isEqualTo('itajubá');
     assertApi('gtmOnSuccess').wasCalled();
 setup: |-
   const JSON = require('JSON');
