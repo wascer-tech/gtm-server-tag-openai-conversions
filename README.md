@@ -1,4 +1,4 @@
-# Wascer OpenAI Ads Conversions
+# OpenAI Ads Conversions By Wascer (ChatGPT)
 
 A Google Tag Manager **server** template that sends conversion events to the
 OpenAI Ads Conversions API. It reads the incoming GA4 event, builds the payload

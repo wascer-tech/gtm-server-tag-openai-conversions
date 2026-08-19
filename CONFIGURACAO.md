@@ -1,4 +1,4 @@
-# Wascer OpenAI Ads Conversions: guia de configuração
+# OpenAI Ads Conversions By Wascer (ChatGPT): guia de configuração
 
 Documento em português para quem vai configurar a tag dentro de um container
 server-side. O `README.md` ao lado cobre a instalação em inglês, para a Community
@@ -19,7 +19,7 @@ A Wascer tem duas tags de OpenAI Ads:
 
 - **Wascer OpenAI Ads Pixel**, no **container web**, dentro do navegador. Guia em
   `openai-ads-pixel-wascer/CONFIGURACAO.md`.
-- **Wascer OpenAI Ads Conversions**, no **container server-side**. É esta.
+- **OpenAI Ads Conversions By Wascer (ChatGPT)**, no **container server-side**. É esta.
 
 O servidor pega o que o navegador perde: bloqueador de anúncio, aba fechada antes
 da confirmação, e principalmente a compra que só existe no seu backend. Rodando
@@ -62,7 +62,7 @@ No **container server-side**:
 ## Passo 3: criar a tag
 
 1. **Tags**, **Novo**, **Configuração da tag**.
-2. Escolha **Wascer OpenAI Ads Conversions** na seção **Personalizado**.
+2. Escolha **OpenAI Ads Conversions By Wascer (ChatGPT)** na seção **Personalizado**.
 3. Preencha o essencial:
 
 | Campo | Valor |
