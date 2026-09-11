@@ -1,6 +1,10 @@
 homepage: "https://wascer.com"
 documentation: "https://github.com/wascer-tech/gtm-server-tag-openai-conversions/blob/main/README.md"
 versions:
+  - sha: 7be00d992b456fdc8330f9a7599f8135d73887a7
+    changeNotes: |
+      Replaces the 32 x 32 third-party thumbnail with a Gallery-compliant
+      96 x 96 Wascer icon.
   - sha: 2761ec2499aaed509559bba7e61fb0ffcb408c96
     changeNotes: |
       New tag logo and new display name.
