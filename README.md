@@ -110,6 +110,9 @@ body in preview mode. The API key is never printed.
 soon as the request leaves. Use it when the container is under pressure and you
 would rather not hold the request open.
 
+`Event type (System Log)` is a free text label for the System Log copy described
+below. Leave it empty to use the event name.
+
 ## Wascer Store integration
 
 The Wascer Store is a document store that runs inside the same container as your
@@ -142,6 +145,39 @@ of dropping it.
 
 The Store never blocks the tag. A failure, a 404, a 503 or a timeout is logged
 and the OpenAI request goes out anyway.
+
+## System Log
+
+When the server container has logging turned on, the tag also sends a copy of
+what it sent to OpenAI, and of the answer it got back, to the Wascer System Log.
+The copy holds the request URL, method and body, the response status and body,
+how long the request took, the event name and your **Event type (System Log)**
+label (the event name when the label is empty).
+
+This only happens when logging is turned on for the container: the hosting proxy
+sets the `x-wascer-log: 1` request header (and `x-wascer-trace-id` to correlate
+the copy). Without that header the tag does nothing extra. Nothing is masked: the
+request URL, with the `pid` parameter, and the request and response bodies are
+copied exactly as they were sent and received. Request headers are not part of
+the copy, so the API key is never copied. Only the OpenAI request is copied.
+Wascer Store reads and writes are not.
+
+The copy is best effort and never changes the result of the tag. With
+`Report success without waiting for the OpenAI response` on, the copy is still
+sent when the OpenAI response arrives.
+
+## Updating the template
+
+To bring a workspace that already has an older version of this template up to date:
+
+1. In your **server** container, open **Templates**, then **Tag Templates**,
+   and open the OpenAI Ads Conversions By Wascer template.
+2. Open the three dot menu and choose **Import**.
+3. Pick the new `template.tpl` from this repository and save the template.
+4. **Publish** the workspace (Submit, then Publish) so the live container picks
+   up the new version.
+
+Tags already created from the template keep the values you filled in.
 
 ## Deduplication with the pixel
 
