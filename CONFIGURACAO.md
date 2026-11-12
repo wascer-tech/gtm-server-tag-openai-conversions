@@ -432,6 +432,14 @@ ela marca sucesso na hora e a resposta chega depois, só para o log. Serve quand
 o tempo da tag importa mais do que saber o resultado. O custo é que uma recusa da
 OpenAI passa a aparecer só no console, e não no status da tag.
 
+**Event type (System Log).** Texto livre que rotula a cópia enviada ao System Log
+da Wascer. Vazio, o rótulo é o nome do evento que chegou (`event_name`). O campo
+não liga nem desliga nada: a cópia só existe quando o System Log está ligado para
+o container, e aí a tag manda ao System Log a URL, o corpo enviado à OpenAI, o
+status e o corpo da resposta, sem máscara. A API key não entra na cópia, porque
+ela viaja no header `Authorization` e headers não são copiados. As chamadas à
+Wascer Store também não são copiadas. A cópia nunca muda o resultado da tag.
+
 ---
 
 ## O que a tag confere antes de enviar

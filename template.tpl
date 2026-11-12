@@ -577,6 +577,13 @@ ___TEMPLATE_PARAMETERS___
         "simpleValueType": true,
         "defaultValue": false,
         "help": "The tag reports success as soon as it sends the request, without waiting for OpenAI. Use it when a slow response is holding up the container."
+      },
+      {
+        "type": "TEXT",
+        "name": "systemLogEventType",
+        "displayName": "Event type (System Log)",
+        "simpleValueType": true,
+        "help": "Custom System Log event type. Empty uses event_name. Collection is controlled by the container toggle."
       }
     ]
   }
@@ -1107,26 +1114,73 @@ function sendToOpenAi(event) {
     });
   }
 
-  const request = sendHttpRequest(url, options, JSON.stringify(body));
+  const serialized = JSON.stringify(body);
+  const started = getTimestampMillis();
+  const request = sendHttpRequest(url, options, serialized);
 
   if (data.optimistic) {
     data.gtmOnSuccess();
     request.then(function (response) {
       logResponse(response);
+      copyOpenAiLog(url, serialized, response, undefined, started);
     }).catch(function (error) {
       log('Message', 'The OpenAI request failed after the tag reported success.', error);
+      copyOpenAiLog(url, serialized, undefined, error, started);
     });
     return;
   }
 
   request.then(function (response) {
     logResponse(response);
+    copyOpenAiLog(url, serialized, response, undefined, started);
     if (response && response.statusCode >= 200 && response.statusCode < 300) data.gtmOnSuccess();
     else data.gtmOnFailure();
   }).catch(function (error) {
     log('Message', 'The OpenAI request failed.', error);
+    copyOpenAiLog(url, serialized, undefined, error, started);
     data.gtmOnFailure();
   });
+}
+
+// System Log
+
+function copyOpenAiLog(url, serialized, response, error, started) {
+  copySystemLog(
+    'openai', 'OpenAI Conversions', url, 'POST', serialized,
+    response ? response.statusCode : 0,
+    response ? response.body : error && (error.body || error.reason),
+    started
+  );
+}
+
+// System Log is controlled by the proxy header, never by tag configuration.
+// Deliberately detached: neither delivery nor collector failure gates tag completion.
+function copySystemLog(platform, tagName, requestUrl, requestMethod, requestBody, responseStatus, responseBody, started) {
+  if (getRequestHeader('x-wascer-log') !== '1') return;
+  const Promise = require('Promise');
+  const elapsed = getTimestampMillis() - started;
+  const duration = elapsed < 0 ? 0 : elapsed > 4294967295 ? 4294967295 : elapsed;
+  Promise.create(function (resolve) { resolve(); }).then(function () {
+    const eventName = getEventData('event_name');
+    const envelope = {
+      trace_id: getRequestHeader('x-wascer-trace-id') || '',
+      platform: platform,
+      tag_name: tagName,
+      event_name: getType(eventName) === 'string' ? eventName : '',
+      event_type: data.systemLogEventType || (getType(eventName) === 'string' ? eventName : ''),
+      request_method: requestMethod,
+      request_url: requestUrl,
+      request_body: requestBody,
+      response_status: responseStatus || 0,
+      response_body: getType(responseBody) === 'string' ? responseBody : '',
+      duration_ms: duration
+    };
+    return sendHttpRequest('https://system-log.wascer.internal/log', {
+      method: 'POST',
+      timeout: 500,
+      headers: {'Content-Type': 'application/json'}
+    }, JSON.stringify(envelope));
+  }).then(function () {}, function () {});
 }
 
 function logResponse(response) {
@@ -1439,6 +1493,10 @@ ___SERVER_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://*.soureicdn.com/*"
+              },
+              {
+                "type": 1,
+                "string": "https://system-log.wascer.internal/log"
               }
             ]
           }
@@ -1534,6 +1592,36 @@ ___SERVER_PERMISSIONS___
                   {
                     "type": 1,
                     "string": "referer"
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "headerName"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "x-wascer-log"
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "headerName"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "x-wascer-trace-id"
                   }
                 ]
               }
@@ -2226,6 +2314,27 @@ scenarios:
 
     assertThat(capturedBody.events[0].user.city).isEqualTo('itajubá');
     assertApi('gtmOnSuccess').wasCalled();
+- name: Sends nothing to the System Log unless x-wascer-log is 1
+  code: |-
+    mockEvent(baseEventData());
+
+    const urls = [];
+    mock('sendHttpRequest', (url, options, body) => {
+      urls.push(url);
+      return resolvedRequest({statusCode: 200, body: '{}'});
+    });
+
+    const settings = mockData({eventNameStandard: 'order_created', systemLogEventType: 'sale'});
+
+    runCode(settings);
+
+    mock('getRequestHeader', (name) => name === 'x-wascer-log' ? 'true' : undefined);
+    runCode(settings);
+
+    assertThat(urls.length).isEqualTo(2);
+    assertThat(urls[0]).isEqualTo('https://bzr.openai.com/v1/events?pid=px-1');
+    assertThat(urls[1]).isEqualTo(urls[0]);
+    assertApi('gtmOnSuccess').wasCalled();
 setup: |-
   const JSON = require('JSON');
   const Object = require('Object');
@@ -2358,3 +2467,18 @@ Amounts travel in the minor unit
 2599 means 25.99 in a two decimal currency. The tag converts what it reads from
 the incoming event, and the amount_major field in the event data table lets you
 hand it a regular value such as 25.99.
+
+System Log (Wascer hosted containers)
+Only the x-wascer-log: 1 request header, set by the Wascer hosting proxy, enables
+a best-effort copy of the OpenAI request after it finishes. The copy goes only to
+https://system-log.wascer.internal/log (pod loopback, trusted TLS on 443) and
+carries x-wascer-trace-id as trace_id. Without that header the tag does nothing
+extra. Event type (System Log) is free text; empty uses event_name.
+The request URL (with the pid query parameter), the request body and the response
+body are the original strings, without masking, projection or truncation. Request
+headers are not copied, so the API key stays out. Network failures use status 0
+and the available error body/reason. Wascer Store reads and writes are not copied.
+No credentials, config fetch, modes, queue or retry are added.
+The logger is detached from tag completion; late delivery remains best-effort.
+send_http gained the exact loopback URL; the logging destination is fixed in code
+and never derives from a tag field.
